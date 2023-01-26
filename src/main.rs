@@ -1,6 +1,6 @@
-use wgpu_exercise::run;
+use wgpu_exercise::{run};
+
 
 fn main() {
-
     run();
 }
