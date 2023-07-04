@@ -1,6 +1,5 @@
 use pollster::block_on;
 
-#[cfg(feature = "challenge")]
 mod challenge;
 mod standard;
 
