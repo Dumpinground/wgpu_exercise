@@ -1,5 +1,13 @@
+use pollster::block_on;
+
+#[cfg(feature = "challenge")]
+mod challenge;
 mod standard;
 
 fn main() {
-    pollster::block_on(standard::run());
+    if cfg!(feature = "challenge") {
+        pollster::block_on(challenge::run());
+    } else {
+        pollster::block_on(standard::run());
+    }
 }

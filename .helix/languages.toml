@@ -1,0 +1,6 @@
+[[language]]
+name = "rust"
+
+[language.config.cargo]
+check = "clippy"
+features = [ "challenge" ]
