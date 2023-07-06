@@ -9,10 +9,10 @@ default = []
 challenge = []
 
 [dependencies]
-winit = "0.27"
+winit = "0.28"
 env_logger = "0.10"
 log = "0.4"
-wgpu = "0.15"
+wgpu = "0.16"
 
 # 异步运行时
 pollster = "0.2"

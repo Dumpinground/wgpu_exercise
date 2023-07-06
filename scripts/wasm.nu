@@ -4,7 +4,7 @@ source example.nu
 def main [
   id: int # Input example id. Run tutorial_1 when id = 1.
   --release (-r) # Compile in Debug or Release Mode.
-  feature = 'default' # Set this to `challenge` to run a challenge example.
+  feature = 'default' # Set this to 'challenge' to run a challenge example.
   --target = wasm32-unknown-unknown # Can be set to another target ep. wasm32-wasi.
 ] {
   let build = if not $release { 'debug' } else { 'release' }
