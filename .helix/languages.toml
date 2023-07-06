@@ -4,3 +4,4 @@ name = "rust"
 [language.config.cargo]
 check = "clippy"
 features = [ "challenge" ]
+target = "wasm32-unknown-unknown"
