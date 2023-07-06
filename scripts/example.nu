@@ -8,5 +8,5 @@ def get_example [
     | get name.0
     | parse '{dir}\{example}'
   )
-  $file | get example.0
+  $file
 }
