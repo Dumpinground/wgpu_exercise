@@ -5,7 +5,12 @@ use winit::{
 };
 
 pub async fn run() {
-    env_logger::init();
+    if cfg!(target_arch = "wasm32") {
+        std::panic::set_hook(Box::new(console_error_panic_hook::hook));
+        console_log::init().expect("could not initialize logger");
+    } else {
+        env_logger::init();
+    }
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new().build(&event_loop).unwrap();
 
