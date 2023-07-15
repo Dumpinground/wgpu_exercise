@@ -18,4 +18,6 @@ def main [
 
   let wasm_path = $'target/($target)/($build)/examples/($example).wasm'
   wasm-bindgen --out-dir dist --web $wasm_path
+
+  cp index.html dist/index.html
 }
