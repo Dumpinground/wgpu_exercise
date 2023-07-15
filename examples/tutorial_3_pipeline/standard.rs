@@ -4,15 +4,7 @@ use winit::{
     window::{Window, WindowBuilder},
 };
 
-pub async fn run() {
-    if cfg!(target_arch = "wasm32") {
-        std::panic::set_hook(Box::new(console_error_panic_hook::hook));
-        console_log::init().expect("could not initialize logger");
-    } else {
-        env_logger::init();
-    }
-    let event_loop = EventLoop::new();
-    let window = WindowBuilder::new().build(&event_loop).unwrap();
+pub async fn run(event_loop: EventLoop<()>, window: Window) {
 
     let mut state = State::new(&window).await;
 
@@ -98,7 +90,7 @@ impl State {
             .request_device(
                 &wgpu::DeviceDescriptor {
                     features: wgpu::Features::empty(),
-                    limits: wgpu::Limits::default(),
+                    limits: wgpu::Limits::default().using_resolution(adapter.limits()),
                     label: None,
                 },
                 None,
@@ -116,6 +108,8 @@ impl State {
             alpha_mode: caps.alpha_modes[0],
             view_formats: vec![],
         };
+
+        surface.configure(&device, &config);
 
         // let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
         //     label: Some("Shader"),

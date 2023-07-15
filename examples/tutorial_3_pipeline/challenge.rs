@@ -1,14 +1,10 @@
 use winit::{
     event::{ElementState, Event, KeyboardInput, VirtualKeyCode, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
-    window::{Window, WindowBuilder},
+    window::Window,
 };
 
-pub async fn run() {
-    env_logger::init();
-    let event_loop = EventLoop::new();
-    let window = WindowBuilder::new().build(&event_loop).unwrap();
-
+pub async fn run(event_loop: EventLoop<()>, window: Window) {
     let mut state = State::new(&window).await;
 
     event_loop.run(move |event, _, control_flow| match event {
@@ -93,11 +89,7 @@ impl State {
             .request_device(
                 &wgpu::DeviceDescriptor {
                     features: wgpu::Features::empty(),
-                    limits: if cfg!(target_arch = "wasm32") {
-                        wgpu::Limits::downlevel_webgl2_defaults()
-                    } else {
-                        wgpu::Limits::default()
-                    },
+                    limits: wgpu::Limits::default().using_resolution(adapter.limits()),
                     label: None,
                 },
                 None,
@@ -115,6 +107,8 @@ impl State {
             alpha_mode: caps.alpha_modes[0],
             view_formats: vec![],
         };
+
+        surface.configure(&device, &config);
 
         // let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
         //     label: Some("Shader"),

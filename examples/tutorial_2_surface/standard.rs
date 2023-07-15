@@ -1,14 +1,10 @@
 use winit::{
     event::{ElementState, Event, KeyboardInput, VirtualKeyCode, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
-    window::{Window, WindowBuilder},
+    window::Window,
 };
 
-pub async fn run() {
-    env_logger::init();
-    let event_loop = EventLoop::new();
-    let window = WindowBuilder::new().build(&event_loop).unwrap();
-
+pub async fn run(event_loop: EventLoop<()>, window: Window) {
     let mut state = State::new(&window).await;
 
     event_loop.run(move |event, _, control_flow| match event {
@@ -42,9 +38,8 @@ pub async fn run() {
         Event::RedrawRequested(window_id) if window_id == window.id() => {
             state.update();
             match state.render() {
-
                 Ok(_) => {}
-        
+
                 Err(wgpu::SurfaceError::Lost) => state.resize(state.size),
 
                 Err(wgpu::SurfaceError::OutOfMemory) => *control_flow = ControlFlow::Exit,
@@ -73,10 +68,7 @@ impl State {
     async fn new(window: &Window) -> Self {
         let size = window.inner_size();
 
-        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
-            backends: wgpu::Backends::all(),
-            ..Default::default()
-        });
+        let instance = wgpu::Instance::default();
 
         let surface = unsafe { instance.create_surface(window).unwrap() };
 
@@ -86,23 +78,19 @@ impl State {
                 ..Default::default()
             })
             .await
-            .unwrap();
+            .expect("Failed to find an appropriate adapter");
 
         let (device, queue) = adapter
             .request_device(
                 &wgpu::DeviceDescriptor {
                     features: wgpu::Features::empty(),
-                    limits: if cfg!(target_arch = "wasm32") {
-                        wgpu::Limits::downlevel_webgl2_defaults()
-                    } else {
-                        wgpu::Limits::default()
-                    },
+                    limits: wgpu::Limits::downlevel_defaults().using_resolution(adapter.limits()),
                     label: None,
                 },
                 None,
             )
             .await
-            .unwrap();
+            .expect("Failed to create device");
 
         let caps = surface.get_capabilities(&adapter);
         let config = wgpu::SurfaceConfiguration {
@@ -114,6 +102,8 @@ impl State {
             alpha_mode: caps.alpha_modes[0],
             view_formats: vec![],
         };
+
+        surface.configure(&device, &config);
 
         Self {
             surface,
@@ -140,9 +130,13 @@ impl State {
     fn update(&mut self) {}
 
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
-        let output = self.surface.get_current_texture()?;
 
-        let view = output
+        let frame = self
+            .surface
+            .get_current_texture()
+            .expect("Failed to acquire next swap chain texture");
+
+        let view = frame
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
 
@@ -172,8 +166,8 @@ impl State {
             });
         }
 
-        self.queue.submit(std::iter::once(encoder.finish()));
-        output.present();
+        self.queue.submit(Some(encoder.finish()));
+        frame.present();
 
         Ok(())
     }

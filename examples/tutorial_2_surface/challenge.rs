@@ -1,14 +1,10 @@
 use winit::{
     event::{ElementState, Event, KeyboardInput, VirtualKeyCode, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
-    window::{Window, WindowBuilder},
+    window::Window,
 };
 
-pub async fn run() {
-    env_logger::init();
-    let event_loop = EventLoop::new();
-    let window = WindowBuilder::new().build(&event_loop).unwrap();
-
+pub async fn run(event_loop: EventLoop<()>, window: Window) {
     let mut state = State::new(&window).await;
 
     event_loop.run(move |event, _, control_flow| match event {
@@ -94,7 +90,7 @@ impl State {
                 &wgpu::DeviceDescriptor {
                     features: wgpu::Features::empty(),
                     limits: if cfg!(target_arch = "wasm32") {
-                        wgpu::Limits::downlevel_webgl2_defaults()
+                        wgpu::Limits::downlevel_defaults()
                     } else {
                         wgpu::Limits::default()
                     },
@@ -115,6 +111,8 @@ impl State {
             alpha_mode: caps.alpha_modes[0],
             view_formats: vec![],
         };
+
+        surface.configure(&device, &config);
 
         let clear_color = wgpu::Color::BLACK;
 
@@ -138,7 +136,8 @@ impl State {
     }
 
     fn input(&mut self, event: &WindowEvent) -> bool {
-        match event {
+        match event {
+
             WindowEvent::CursorMoved { position, .. } => {
                 self.clear_color = wgpu::Color {
                     r: position.x / self.size.width as f64,
