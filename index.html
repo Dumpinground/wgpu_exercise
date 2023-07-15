@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body>
+  <script type="module">
+    import init1 from "./tutorial_1_window.js";
+    import init2 from "./tutorial_2_surface.js";
+    import init3 from "./tutorial_3_pipeline.js";
+    init3().then(() => {
+      console.log("WASM Loaded");
+    });
+  </script>
+</body>
+
+</html>
