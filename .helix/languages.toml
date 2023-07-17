@@ -5,3 +5,6 @@ name = "rust"
 check = "clippy"
 features = [ "challenge" ]
 target = "wasm32-unknown-unknown"
+
+[language.config.check]
+targets = [ "x86_64-pc-windows-msvc", "wasm32-unknown-unknown", "wasm32-wasi" ]
