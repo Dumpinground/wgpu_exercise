@@ -1,11 +1,10 @@
 use winit::{
     event::{ElementState, Event, KeyboardInput, VirtualKeyCode, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
-    window::{Window, WindowBuilder},
+    window::Window,
 };
 
 pub async fn run(event_loop: EventLoop<()>, window: Window) {
-
     let mut state = State::new(&window).await;
 
     event_loop.run(move |event, _, control_flow| match event {
