@@ -9,11 +9,15 @@ def main [
 ] {
   let build = if not $release { 'debug' } else { 'release' }
   let example = ( get_example $id | get example.0 )
-  
-  # RUSTFLAGS=--cfg=web_sys_unstable_apis cargo b --target $target --example $example -F $feature
-  # RUSTFLAGS=--cfg=web_sys_unstable_apis cargo b ( if $release { '-r' } else { ignore } ) --target $target --example $example -F $feature
 
-  let cmd_build = ([RUSTFLAGS=--cfg=web_sys_unstable_apis cargo b (if $release { '-r' }) --target $target --example $example -F $feature] | filter { |x| $x != null } | str join ' ')
+  let cmd_build = (
+    [
+      RUSTFLAGS=--cfg=web_sys_unstable_apis cargo b --target $target --example $example -F $feature
+      (if $release { '-r' })
+    ] 
+      | filter { |x| $x != null } 
+      | str join ' '
+  )
   nu -c $cmd_build
 
   let wasm_path = $'target/($target)/($build)/examples/($example).wasm'
