@@ -25,9 +25,10 @@ pub fn run<A: Action + 'static>(
     wh_ratio: Option<f32>,
     _html_canvas_container_id: Option<&'static str>,
 ) {
-    use winit::event_loop;
-
     env_logger::init();
+
+    let (event_loop, instance) = pollster::block_on(create_action_instance::<A>(wh_ratio));
+    start_event_loop::<A>(event_loop, instance);
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -45,6 +46,22 @@ pub fn run<A: Action + 'static>(
             create_action_instance::<A>(wh_ratio, html_canvas_container_id).await;
         let run_closure =
             Closure::once_into_js(move || start_event_loop::<A>(event_loop, instance));
+
+        if let Err(error) = call_catch(&run_closure) {
+            let is_control_flow_exception = error.dyn_ref::<js_sys::Error>().map_or(false, |e| {
+                e.message().includes("Using exceptions for control flow", 0)
+            });
+
+            if !is_control_flow_exception {
+                web_sys::console::error_1(&error);
+            }
+        }
+
+        #[wasm_bindgen]
+        extern "C" {
+            #[wasm_bindgen(catch, js_namespace = Function, js_name = "prototype.call.call")]
+            fn call_catch(this: &JsValue) -> Result<(), JsValue>;
+        }
     });
 }
 
@@ -56,6 +73,7 @@ async fn create_action_instance<A: Action + 'static>(
     let window = WindowBuilder::new().build(&event_loop).unwrap();
     let scale_factor = window.scale_factor() as f32;
 
+    // 计算一个默认显示高度
     let height = (if cfg!(target_arch = "wasm32") {
         550.
     } else {
