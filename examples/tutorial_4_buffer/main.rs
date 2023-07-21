@@ -34,3 +34,14 @@ fn main() {
         }
     }
 }
+
+async fn app() {
+    let event_loop = EventLoop::new();
+    let window = winit::window::Window::new(&event_loop).unwrap();
+
+    if cfg!(target_arch = "challenge") {
+        challenge::run(event_loop, window).await
+    } else {
+        standard::run(event_loop, window).await
+    };
+}

@@ -38,7 +38,7 @@ impl Deref for AppSurface {
 }
 
 pub trait SurfaceFrame {
-    fn view_size(&self) -> ViewSize;
+    // fn view_size(&self) -> ViewSize;
     fn resize_surface(&mut self);
     fn pintch(&mut self, _touch: Touch) {}
     fn touch(&mut self, _touch: Touch) {}
