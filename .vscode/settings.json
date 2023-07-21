@@ -7,8 +7,5 @@
     "rust-analyzer.check.extraEnv": {
         "RUSTFLAGS": "--cfg=web_sys_unstable_apis"
     },
-    "rust-analyzer.cargo.target": "wasm32-wasi",
-    "rust-analyzer.linkedProjects": [
-        ".\\web\\Cargo.toml"
-    ]
+    "rust-analyzer.cargo.target": "wasm32-wasi"
 }
