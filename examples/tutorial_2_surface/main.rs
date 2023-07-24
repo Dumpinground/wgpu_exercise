@@ -5,17 +5,10 @@ mod challenge;
 mod standard;
 
 fn main() {
-    let event_loop = EventLoop::new();
-    let window = winit::window::Window::new(&event_loop).unwrap();
-
     #[cfg(not(target_arch = "wasm32"))]
     {
         env_logger::init();
-        if cfg!(feature = "challenge") {
-            pollster::block_on(challenge::run(event_loop, window));
-        } else {
-            pollster::block_on(standard::run(event_loop, window));
-        }
+        pollster::block_on(app());
     }
 
     #[cfg(target_arch = "wasm32")]
@@ -31,12 +24,19 @@ fn main() {
                     .ok()
             })
             .expect("couldn't append canvas to document body");
-        if cfg!(feature = "challenge") {
-            log_print("run challenge");
-            wasm_bindgen_futures::spawn_local(challenge::run(event_loop, window));
-        } else {
-            log_print("run example");
-            wasm_bindgen_futures::spawn_local(standard::run(event_loop, window));
-        }
+        wasm_bindgen_futures::spawn_local(app());
     }
+}
+
+async fn app() {
+    let event_loop = EventLoop::new();
+    let window = winit::window::Window::new(&event_loop).unwrap();
+
+    if cfg!(feature = "challenge") {
+        log_print("run challenge example");
+        challenge::run(event_loop, window).await
+    } else {
+        log_print("run standard example");
+        standard::run(event_loop, window).await
+    };
 }
