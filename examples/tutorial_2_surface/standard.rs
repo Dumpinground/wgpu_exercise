@@ -84,7 +84,12 @@ impl State {
             .request_device(
                 &wgpu::DeviceDescriptor {
                     features: wgpu::Features::empty(),
-                    limits: wgpu::Limits::downlevel_defaults().using_resolution(adapter.limits()),
+                    // limits: wgpu::Limits::downlevel_defaults().using_resolution(adapter.limits()),
+                    limits: if cfg!(feature = "webgl") {
+                        wgpu::Limits::downlevel_webgl2_defaults()
+                    } else {
+                        wgpu::Limits::downlevel_defaults()
+                    },
                     label: None,
                 },
                 None,
@@ -130,7 +135,6 @@ impl State {
     fn update(&mut self) {}
 
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
-
         let frame = self
             .surface
             .get_current_texture()

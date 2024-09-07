@@ -1,4 +1,5 @@
-use winit::event_loop::EventLoop;
+use wgpu_exercise::log_print;
+use winit::{event_loop::EventLoop, window::Window};
 
 mod challenge;
 mod standard;
@@ -10,11 +11,7 @@ fn main() {
     #[cfg(not(target_arch = "wasm32"))]
     {
         env_logger::init();
-        if cfg!(feature = "challenge") {
-            pollster::block_on(challenge::run(event_loop, window));
-        } else {
-            pollster::block_on(standard::run(event_loop, window));
-        }
+        pollster::block_on(app(event_loop, window));
     }
 
     #[cfg(target_arch = "wasm32")]
@@ -22,15 +19,24 @@ fn main() {
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));
         console_log::init().expect("could not initialize logger");
         use winit::platform::web::WindowExtWebSys;
-        web_sys::window().and_then(|win| win.document())
-        .and_then(|doc| doc.body())
-        .and_then(|body| {
-            body.append_child(&web_sys::Element::from(window.canvas())).ok()
-        }).expect("couldn't append canvas to document body");
-        if cfg!(feature = "challenge") {
-            wasm_bindgen_futures::spawn_local(challenge::run(event_loop, window));
-        } else {
-            wasm_bindgen_futures::spawn_local(standard::run(event_loop, window));
-        }
+        web_sys::window()
+            .and_then(|win| win.document())
+            .and_then(|doc| doc.body())
+            .and_then(|body| {
+                body.append_child(&web_sys::Element::from(window.canvas()))
+                    .ok()
+            })
+            .expect("couldn't append canvas to document body");
+        wasm_bindgen_futures::spawn_local(app(event_loop, window));
     }
+}
+
+async fn app(event_loop: EventLoop<()>, window: Window) {
+    if cfg!(feature = "challenge") {
+        log_print("run challenge example");
+        challenge::run(event_loop, window).await
+    } else {
+        log_print("run standard example");
+        standard::run(event_loop, window).await
+    };
 }

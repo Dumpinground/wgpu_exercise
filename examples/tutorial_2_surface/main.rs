@@ -1,5 +1,5 @@
 use wgpu_exercise::log_print;
-use winit::event_loop::EventLoop;
+use winit::{event_loop::EventLoop, window::Window};
 
 mod challenge;
 mod standard;
@@ -11,11 +11,7 @@ fn main() {
     #[cfg(not(target_arch = "wasm32"))]
     {
         env_logger::init();
-        if cfg!(feature = "challenge") {
-            pollster::block_on(challenge::run(event_loop, window));
-        } else {
-            pollster::block_on(standard::run(event_loop, window));
-        }
+        pollster::block_on(app(event_loop, window));
     }
 
     #[cfg(target_arch = "wasm32")]
@@ -31,12 +27,16 @@ fn main() {
                     .ok()
             })
             .expect("couldn't append canvas to document body");
-        if cfg!(feature = "challenge") {
-            log_print("run challenge");
-            wasm_bindgen_futures::spawn_local(challenge::run(event_loop, window));
-        } else {
-            log_print("run example");
-            wasm_bindgen_futures::spawn_local(standard::run(event_loop, window));
-        }
+        wasm_bindgen_futures::spawn_local(app(event_loop, window));
     }
+}
+
+async fn app(event_loop: EventLoop<()>, window: Window) {
+    if cfg!(feature = "challenge") {
+        log_print("run challenge example");
+        challenge::run(event_loop, window).await
+    } else {
+        log_print("run standard example");
+        standard::run(event_loop, window).await
+    };
 }

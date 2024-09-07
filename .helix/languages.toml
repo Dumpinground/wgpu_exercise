@@ -1,7 +1,7 @@
-[[language]]
-name = "rust"
-
-[language.config.cargo]
+[language-server.rust-analyzer.config.cargo]
 check = "clippy"
 features = [ "challenge" ]
 target = "wasm32-unknown-unknown"
+
+[language-server.rust-analyzer.config.check]
+targets = [ "x86_64-pc-windows-msvc", "wasm32-unknown-unknown", "wasm32-wasi" ]
